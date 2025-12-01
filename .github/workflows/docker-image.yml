@@ -2,7 +2,7 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "staging" ]
 
 jobs:
 
@@ -19,14 +19,38 @@ jobs:
         uv sync
         uv add pytest
         uv run pytest
-    
+
+
+  deploy-to-staging:
+    name: Build and push to staging repo
+    needs: build
+    runs-on: ubuntu-latest
+    environment: Staging
+    if: github.ref == 'refs/heads/staging'
+    steps:
+    - uses: actions/checkout@v4
     - uses: mr-smithers-excellent/docker-build-push@v6
-      name: Build & push Docker image
       with:
-        image: glen912/flask
+        image: glen912/staging-flask
         tags: v1, latest
         registry: docker.io
         dockerfile: flask-app/Dockerfile
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    
+        username: ${{ secrets.STAGING_DOCKER_USERNAME }}
+        password: ${{ secrets.STAGING_DOCKER_PASSWORD }}
+
+  deploy-to-production:
+    name: Build and push to production repo
+    needs: build
+    runs-on: ubuntu-latest
+    environment: Production
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v4
+    - uses: mr-smithers-excellent/docker-build-push@v6
+      with:
+        image: glen912/prod-flask
+        tags: v1, latest
+        registry: docker.io
+        dockerfile: flask-app/Dockerfile
+        username: ${{ secrets.PROD_DOCKER_USERNAME }}
+        password: ${{ secrets.PROD_DOCKER_PASSWORD }}
