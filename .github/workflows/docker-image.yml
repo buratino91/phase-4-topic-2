@@ -17,6 +17,7 @@ jobs:
         pip install uv
         cd flask-app
         uv sync
+        uv add pytest
         uv run pytest
     
     - uses: mr-smithers-excellent/docker-build-push@v6
