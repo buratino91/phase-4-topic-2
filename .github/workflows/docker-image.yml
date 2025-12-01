@@ -15,6 +15,7 @@ jobs:
     - name: Test flask app
       run: |
         pip install uv
+        cd flask-app
         uv sync
         uv run pytest
     
